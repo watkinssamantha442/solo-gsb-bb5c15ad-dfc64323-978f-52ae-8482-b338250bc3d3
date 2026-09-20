@@ -1,0 +1,18 @@
+services:
+  pairing-api:
+    build: .
+    image: seminar-pairing-api:latest
+    container_name: seminar-pairing-api
+    # Host port can be overridden, e.g. PAIRING_API_PORT=9000 docker compose up --build
+    ports:
+      - "${PAIRING_API_PORT:-8000}:8000"
+    environment:
+      # uvicorn log level: critical | error | warning | info | debug | trace
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import json,urllib.request,sys; sys.exit(0 if json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3))['status']=='ok' else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
